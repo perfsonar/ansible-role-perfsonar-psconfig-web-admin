@@ -1,0 +1,13 @@
+---
+# defaults file for perfsonar-psconfig-web-admin
+
+perfsonar_pwa_docker_config_dir: /etc/docker
+perfsonar_pwa_docker_data_root: /usr/local
+perfsonar_pwa_docker_network: pwa
+perfsonar_pwa_email_address:
+perfsonar_pwa_selinux_disable: True
+perfsonar_pwa_fqdn: "{{ inventory_hostname }}"
+
+# perfsonar_psconfig_publish_remote_agents: "{{ groups['ps-maddash'] }}
+#     + {{ groups['ps-toolkits'] }}
+#     + {{ groups['ps-testpoints'] }}"

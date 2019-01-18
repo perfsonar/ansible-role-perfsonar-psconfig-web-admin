@@ -1,0 +1,159 @@
+---
+# tasks file for perfsonar-psconfig-web-admin
+
+- name: Install Docker Python modules
+  tags: [ 'ps::install' ]
+  pip:
+    name: docker
+    state: latest
+
+- name: create docker config directory "{{ perfsonar_pwa_docker_config_dir }}"
+  tags: [ 'ps::config' ]
+  file:
+    name: "{{ perfsonar_pwa_docker_config_dir }}"
+    state: directory
+
+- name: docker config template in "{{ perfsonar_pwa_docker_config_dir }}"
+  tags: [ 'ps::config' ]
+  template:
+    src: daemon.json
+    dest: "{{ perfsonar_pwa_docker_config_dir }}"
+
+- name: install pwa default configs
+  tags: [ 'ps::config' ]
+  unarchive:
+    src: https://github.com/perfsonar/psconfig-web/raw/master/deploy/docker/pwa.sample.tar.gz
+    dest: /etc
+    remote_src: yes
+
+- name: add FQDN to pwa config files
+  tags: [ 'ps::config' ]
+  replace:
+    path: "{{ item }}"
+    regexp: '<pwa_hostname>'
+    replace: "{{ perfsonar_pwa_fqdn }}"
+  with_items:
+    - /etc/pwa/index.js
+    - /etc/pwa/auth/index.js
+
+- name: add email address to pwa config files
+  tags: [ 'ps::config' ]
+  replace:
+    path: "{{ item }}"
+    regexp: '<email_address>'
+    replace: "{{ perfsonar_pwa_email_address }}"
+  with_items:
+    - /etc/pwa/auth/index.js
+  when: perfsonar_pwa_email_address is defined
+
+- name: remove --selinux-enabled option from /etc/sysconfig/docker
+  tags: [ 'ps::config' ]
+  replace:
+    path: /etc/sysconfig/docker
+    regexp: '--selinux-enabled'
+    replace: ''
+  when: perfsonar_pwa_selinux_disable is True
+
+# sudo openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/pwa/auth/key.pem -out /etc/pwa/auth/cert.pem
+- name: openssl req keys
+
+# cp cert.pm trusted.pm -or- ssl_verify_client off
+
+### TODO: LOGROTATE
+
+### TODO: INTEGRATE WITH OTHER WEB APPS
+### https://docs.perfsonar.net/pwa_running_alongside
+
+### TODO: SSL HOST CERTIFICATES
+
+- name: enable and start docker 
+  tags: [ 'ps::running' ]
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- name: create docker network {{ perfsonar_pwa_docker_network }}
+  tags: [ 'ps::running' ]
+  docker_network:
+    name: "{{ perfsonar_pwa_docker_network }}"
+
+- name: create pwa data directory
+  tags: [ 'ps::config' ]
+  file:
+    name: "{{ perfsonar_pwa_docker_data_root }}/data"
+    state: directory
+
+- name: create pwa data/mongo directory
+  tags: [ 'ps::config' ]
+  file:
+    name: "{{ perfsonar_pwa_docker_data_root }}/data/mongo"
+    state: directory
+
+- name: create mongo db Docker container
+  tags: [ 'ps::running' ]
+  docker_container:
+    name: mongo
+    image: mongo
+    restart: yes
+    detach: yes
+    networks: 
+      - name: "{{ perfsonar_pwa_docker_network }}"
+    volumes: 
+      - "{{ perfsonar_pwa_docker_data_root }}/data/mongo:/data/db"
+
+- name: run SCA auth service Docker container
+  tags: [ 'ps::running' ]
+  docker_container:
+    name: sca-auth
+    image: perfsonar/sca-auth
+    restart: yes
+    detach: yes
+    networks: 
+      - name: "{{ perfsonar_pwa_docker_network }}"
+    volumes: 
+      - /etc/pwa/auth:/app/api/config
+      - /usr/local/data/auth:/db
+
+- name: run PWA's main UI/API Docker container
+  tags: [ 'ps::running' ]
+  docker_container:
+    name: pwa-admin1
+    image: perfsonar/pwa-admin
+    restart: yes
+    detach: yes
+    networks: 
+      - name: "{{ perfsonar_pwa_docker_network }}"
+    volumes: 
+      - /etc/pwa:/app/api/config:ro
+
+- name: run meshconfig publisher Docker container
+  tags: [ 'ps::running' ]
+  docker_container:
+    name: pwa-pub1
+    image: perfsonar/pwa-pub
+    restart: yes
+    detach: yes
+    networks: 
+      - name: "{{ perfsonar_pwa_docker_network }}"
+    volumes: 
+      - /etc/pwa:/app/api/config:ro
+
+- name: run nginx Docker container
+  tags: [ 'ps::running' ]
+  docker_container:
+    name: nginx
+    image: nginx
+    restart: yes
+    detach: yes
+    networks: 
+      - name: "{{ perfsonar_pwa_docker_network }}"
+    volumes: 
+      - /etc/pwa/shared:/shared:ro
+      - /etc/pwa/nginx:/etc/nginx:ro
+      - /etc/pwa/auth:/certs:ro
+    published_ports:
+      - 80:80
+      - 443:443
+      - 9443:9443
+
