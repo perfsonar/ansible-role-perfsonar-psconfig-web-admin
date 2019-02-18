@@ -44,7 +44,7 @@
     replace: "{{ perfsonar_pwa_email_address }}"
   with_items:
     - /etc/pwa/auth/index.js
-  when: perfsonar_pwa_email_address is defined
+  when: perfsonar_pwa_email_address != "<email_address>"
 
 - name: remove --selinux-enabled option from /etc/sysconfig/docker
   tags: [ 'ps::config' ]
@@ -52,12 +52,25 @@
     path: /etc/sysconfig/docker
     regexp: '--selinux-enabled'
     replace: ''
-  when: perfsonar_pwa_selinux_disable is True
+  when: perfsonar_pwa_selinux_disable
 
-# sudo openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/pwa/auth/key.pem -out /etc/pwa/auth/cert.pem
-- name: openssl req keys
+- name: create cert directory "{{ perfsonar_pwa_cert_path }}"
+  tags: [ 'ps::config' ]
+  file:
+    name: "{{ perfsonar_pwa_cert_path }}"
+    state: directory
 
-# cp cert.pm trusted.pm -or- ssl_verify_client off
+# TODO convert this to Ansible modules
+- name: Generate self-signed ssl certificate
+  tags: [ 'ps::config' ]
+  command: "openssl req -x509 -nodes -batch -days 1000 -newkey rsa:2048 -keyout {{ perfsonar_pwa_cert_path }}/key.pem -out {{ perfsonar_pwa_cert_path }}/cert.pem"
+
+- name: copy cert.pm to trusted.pm
+  tags: [ 'ps::config' ]
+  copy:
+    remote_src: true
+    src: "{{ perfsonar_pwa_cert_path }}/cert.pem"
+    dest: "{{ perfsonar_pwa_cert_path }}/trusted.pem"
 
 ### TODO: LOGROTATE
 
@@ -156,4 +169,7 @@
       - 80:80
       - 443:443
       - 9443:9443
+
+- name: meta end play
+  meta: end_play
 
