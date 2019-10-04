@@ -108,6 +108,7 @@
   docker_container:
     name: mongo
     image: mongo
+    pull: "{{ perfsonar_pwa_docker_pull_image | default('no') }}"
     restart: yes
     detach: yes
     networks: 
@@ -120,6 +121,7 @@
   docker_container:
     name: sca-auth
     image: perfsonar/sca-auth
+    pull: "{{ perfsonar_pwa_docker_pull_image | default('no') }}"
     restart: yes
     detach: yes
     networks: 
@@ -133,6 +135,7 @@
   docker_container:
     name: pwa-admin1
     image: perfsonar/pwa-admin
+    pull: "{{ perfsonar_pwa_docker_pull_image | default('no') }}"
     restart: yes
     detach: yes
     networks: 
@@ -145,6 +148,7 @@
   docker_container:
     name: pwa-pub1
     image: perfsonar/pwa-pub
+    pull: "{{ perfsonar_pwa_docker_pull_image | default('no') }}"
     restart: yes
     detach: yes
     networks: 
@@ -157,6 +161,7 @@
   docker_container:
     name: nginx
     image: nginx
+    pull: "{{ perfsonar_pwa_docker_pull_image | default('no') }}"
     restart: yes
     detach: yes
     networks: 
