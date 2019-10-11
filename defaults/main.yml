@@ -14,3 +14,29 @@ perfsonar_pwa_fqdn: "{{ inventory_hostname }}"
 # perfsonar_psconfig_publish_remote_agents: "{{ groups['ps-maddash'] }}
 #     + {{ groups['ps-toolkits'] }}
 #     + {{ groups['ps-testpoints'] }}"
+
+# 
+# This section is for managing PWA local user accounts.
+#
+# If perfsonar_pwa_user_default_domain is set, any account created without
+# an email address expressly defined will use
+# `username@perfsonar_pwa_user_default_domain` by default.
+#
+perfsonar_pwa_user_default_domain: 
+
+# When perfsonar_pwa_user_purge is True, accounts not listed in
+# perfsonar_pwa_user_list will be deleted.
+#
+perfsonar_pwa_user_purge: False
+
+# Accounts REQUIRE:
+#   - username
+#   - fullname
+#   - EITHER email OR perfsonar_pwa_user_default_domain defined
+perfsonar_pwa_user_list:
+#  - username:
+#    fullname:
+#    email:
+#    password:
+#    password_reset: True
+#    scope: ['user', 'admin']

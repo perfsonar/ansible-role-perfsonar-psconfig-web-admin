@@ -175,6 +175,10 @@
       - 443:443
       - 9443:9443
 
+- name: manage PWA local users
+  tags: [ 'ps::pwa_users' ]
+  include: pwa_users.yml
+
 - name: meta end play
   meta: end_play
 
