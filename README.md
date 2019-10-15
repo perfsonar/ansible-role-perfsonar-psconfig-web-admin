@@ -1,7 +1,9 @@
 # ansible-role-perfsonar-psconfig-web-admin
 Install and configure a perfSONAR psconfig web admin site
 
+This is integrated with the master perfSONAR Ansible playbook found here:
 
+<https://github.com/perfsonar/ansible-playbook-perfsonar>
 
 ---
 
