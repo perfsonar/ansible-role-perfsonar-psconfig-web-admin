@@ -5,8 +5,9 @@ This is integrated with the master perfSONAR Ansible playbook found here:
 
 <https://github.com/perfsonar/ansible-playbook-perfsonar>
 
-Please see the role defaults/main.yml for documentation on variables
-and how to use them.
+Please see the role 
+[defaults/main.yml](https://github.com/perfsonar/ansible-role-perfsonar-psconfig-web-admin/blob/master/defaults/main.yml)
+for documentation on variables and how to use them.
 
 ---
 
