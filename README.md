@@ -5,6 +5,9 @@ This is integrated with the master perfSONAR Ansible playbook found here:
 
 <https://github.com/perfsonar/ansible-playbook-perfsonar>
 
+Please see the role defaults/main.yml for documentation on variables
+and how to use them.
+
 ---
 
 **Some useful commands to manage the PWA environment**
