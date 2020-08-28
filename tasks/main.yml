@@ -53,6 +53,7 @@
     regexp: '--selinux-enabled'
     replace: ''
   when: perfsonar_pwa_selinux_disable
+  ignore_errors: yes
 
 - name: create cert directory "{{ perfsonar_pwa_cert_path }}"
   tags: [ 'ps::config' ]
